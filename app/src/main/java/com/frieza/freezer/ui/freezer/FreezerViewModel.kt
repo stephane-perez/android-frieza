@@ -115,10 +115,12 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
         FreezerUiState(b.freezers, current, drawers, b.categories, filterActive, matches)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), FreezerUiState())
 
+    // Read only through `.value` (no UI collector), so they must be shared eagerly:
+    // with WhileSubscribed they would never start and stay empty.
     private val allFoods: StateFlow<List<Food>> = repository.foods
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     private val allCategories: StateFlow<List<Category>> = repository.categories
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // ---- filters ----
 
