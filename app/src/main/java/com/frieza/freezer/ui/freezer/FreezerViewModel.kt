@@ -174,7 +174,7 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
     }
 
     /** Builds a ready-to-paste prompt for an AI assistant from the selected foods. */
-    fun buildClipboardText(): String {
+    fun buildRecipePrompt(): String {
         val categoriesById = allCategories.value.associateBy { it.id }
         val selected = allFoods.value.filter { it.id in _selectedIds.value }
         if (selected.isEmpty()) return ""

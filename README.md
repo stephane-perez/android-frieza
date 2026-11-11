@@ -12,7 +12,7 @@ Application Android (Kotlin + Jetpack Compose) de gestion de congélateur — 10
 - Badges de péremption proche, recherche, filtre par catégorie, tri (nom / péremption / ajout récent)
 - Dupliquer un aliment, le déplacer d'un tiroir ou congélateur à l'autre (formulaire)
 - Liste de courses (avec « ranger au congélateur »)
-- Sélection multiple (appui long) puis copie d'un prompt « recettes » pour l'IA de ton choix
+- Sélection multiple (appui long) puis partage d'un prompt « recettes » vers l'IA de ton choix
 - Sauvegarde / restauration JSON
 - 100 % local, aucun compte, aucune clé API. Les données de la v1 sont migrées automatiquement.
 
@@ -70,7 +70,7 @@ app/src/main/java/com/frieza/freezer/
 ├── data/            Entités Room (Freezer, Drawer, Category, Food, ShoppingItem),
 │                    DAOs, base + migration v1→v2, Repository, sauvegarde JSON
 ├── ui/freezer/      Écran principal : tiroirs empilés et repliables, recherche,
-│                    filtre, tri, sélection multiple, export presse-papier
+│                    filtre, tri, sélection multiple, partage
 ├── ui/food/         Formulaire d'ajout / édition / duplication d'un aliment
 ├── ui/setup/        Création d'un congélateur, édition (renommage, tiroirs)
 ├── ui/category/     Gestion des catégories (nom, couleur)
