@@ -16,59 +16,72 @@ Application Android (Kotlin + Jetpack Compose) de gestion de congélateur — 10
 - Sauvegarde / restauration JSON
 - 100 % local, aucun compte, aucune clé API. Les données de la v1 sont migrées automatiquement.
 
-## Générer l'APK via GitHub Actions (sans Android Studio)
+## Générer l'APK (sans Android Studio)
 
-Le dépôt contient déjà tout ce qu'il faut : le wrapper Gradle complet
-(`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`) et un workflow
-GitHub Actions (`.github/workflows/android-build.yml`) qui compile un APK de
-debug à chaque push sur `main`, ou à la demande.
+Tout est compilé par GitHub Actions (`.github/workflows/android-build.yml`) :
+le dépôt contient le wrapper Gradle complet, aucune installation locale n'est
+nécessaire.
 
-1. Crée un dépôt vide sur GitHub (public ou privé), sans README/licence
-   générés automatiquement (pour éviter un conflit à la première synchro).
-2. Depuis le dossier `Frieza` décompressé, sur ta machine :
-   ```bash
-   cd Frieza
-   git init
-   git add .
-   git commit -m "Initial commit: squelette Frieza"
-   git branch -M main
-   git remote add origin https://github.com/<ton-utilisateur>/<ton-depot>.git
-   git push -u origin main
-   ```
-3. Va dans l'onglet **Actions** du dépôt sur GitHub : le workflow "Build APK"
-   se déclenche automatiquement sur ce push (compte quelques minutes, le temps
-   d'installer le SDK Android et de compiler).
-4. Une fois le run vert, ouvre-le et descends jusqu'à **Artifacts** : télécharge
-   `frieza-debug-apk` (fichier zip contenant `app-debug.apk`).
-5. Tu peux aussi relancer une build manuellement à tout moment via
-   **Actions > Build APK > Run workflow** (bouton "workflow_dispatch").
+Le workflow « Build APK » se lance :
+
+- à chaque push sur `main` et à chaque pull request vers `main` ;
+- à chaque tag `v*` (par ex. `v1.2.0`) ;
+- à la demande via **Actions > Build APK > Run workflow**, avec un champ
+  optionnel `tag` pour reconstruire un tag existant et l'attacher à sa release.
+
+Numéro de version :
+
+- tag `v1.2.3` → `versionName` 1.2.3 ;
+- toute autre build → `0.0.0-dev.<numéro du run>` ;
+- `versionCode` = numéro du run, donc toujours croissant.
+
+Chaque run produit un artifact `frieza-apk` (zip contenant `frieza.apk`),
+téléchargeable en bas de la page du run.
+
+### Publier une version
+
+1. Sur GitHub, **Releases > Draft a new release**, crée un tag `vX.Y.Z` sur
+   `main` et publie la release.
+2. Le push du tag déclenche le workflow, qui compile l'APK puis attache
+   `frieza.apk` à la release (avec des notes de version générées).
+
+Le tag doit pointer sur un commit qui contient déjà le workflow : un tag ne
+compile que le code sur lequel il pointe.
 
 ## Installer l'APK sur ton téléphone
 
-1. Transfère `app-debug.apk` sur ton téléphone (câble, Drive, mail à toi-même, etc.).
-2. Ouvre le fichier depuis le téléphone ; Android demandera d'autoriser
-   l'installation depuis cette source (à activer une fois dans les paramètres).
-3. Installe. L'app est signée avec la clé de debug automatique de Gradle — cela
-   suffit pour une utilisation perso, pas pour une publication sur le Play Store.
+1. Télécharge `frieza.apk` depuis la release (ou l'artifact d'un run) sur le
+   téléphone.
+2. Ouvre le fichier ; Android demande d'autoriser l'installation depuis cette
+   source (à activer une fois).
+3. Installe. Les mises à jour s'installent par-dessus la version précédente,
+   sans perdre les données.
 
-Minimum SDK : Android 8.0 (API 26).
+L'APK est signé avec la clé `app/debug.keystore`, commitée dans le dépôt pour
+que toutes les builds aient la même signature. Cette clé est publique : elle
+convient pour un usage perso, **jamais** pour une publication sur un store.
+
+Minimum : Android 8.0 (API 26).
 
 ## Structure du code
 
 ```
 app/src/main/java/com/frieza/freezer/
-├── data/            Entités Room (Food, FreezerConfig), DAOs, Repository
-├── ui/setup/        Écran de configuration du congélateur (nb d'étages)
-├── ui/freezer/      Écran principal : onglets par étage, sélection multiple,
-│                    export presse-papier
-├── ui/food/         Formulaire d'ajout / édition d'un aliment
-├── ui/navigation/   Graphe de navigation (Setup ↔ Freezer ↔ FoodForm)
-└── ui/theme/        Thème Material 3 (couleurs bleu glacé)
+├── data/            Entités Room (Freezer, Drawer, Category, Food, ShoppingItem),
+│                    DAOs, base + migration v1→v2, Repository, sauvegarde JSON
+├── ui/freezer/      Écran principal : tiroirs empilés et repliables, recherche,
+│                    filtre, tri, sélection multiple, export presse-papier
+├── ui/food/         Formulaire d'ajout / édition / duplication d'un aliment
+├── ui/setup/        Création d'un congélateur, édition (renommage, tiroirs)
+├── ui/category/     Gestion des catégories (nom, couleur)
+├── ui/shopping/     Liste de courses
+├── ui/navigation/   Graphe de navigation
+├── ui/theme/        Thème Material 3 (couleurs bleu glacé)
+└── util/            Dates (stockées à minuit UTC) et formatage des aliments
 ```
 
 ## Pistes pour la suite
 
+- Internationalisation (anglais par défaut, français conservé)
 - Alertes de péremption (WorkManager + notifications) à partir de `expirationDate`
-- Tri / filtre par catégorie ou date de péremption sur l'écran principal
-- Réordonnancement ou nommage personnalisé des étages
 - Historique des aliments consommés / statistiques de gaspillage
