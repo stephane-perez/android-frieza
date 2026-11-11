@@ -58,6 +58,20 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
     private val _selectedIds = MutableStateFlow<Set<Long>>(emptySet())
     val selectedIds: StateFlow<Set<Long>> = _selectedIds
 
+    /**
+     * Drawers the user collapsed. Kept in the ViewModel (not in composition) so the
+     * open/closed state survives navigating to the food form and back. Everything is
+     * expanded by default.
+     */
+    private val _collapsedDrawerIds = MutableStateFlow<Set<Long>>(emptySet())
+    val collapsedDrawerIds: StateFlow<Set<Long>> = _collapsedDrawerIds
+
+    fun toggleDrawerExpanded(drawerId: Long) {
+        _collapsedDrawerIds.value = _collapsedDrawerIds.value.let { current ->
+            if (drawerId in current) current - drawerId else current + drawerId
+        }
+    }
+
     val isSelectionMode: StateFlow<Boolean> = _selectedIds
         .map { it.isNotEmpty() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
@@ -101,10 +115,12 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
         FreezerUiState(b.freezers, current, drawers, b.categories, filterActive, matches)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), FreezerUiState())
 
+    // Read only through `.value` (no UI collector), so they must be shared eagerly:
+    // with WhileSubscribed they would never start and stay empty.
     private val allFoods: StateFlow<List<Food>> = repository.foods
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     private val allCategories: StateFlow<List<Category>> = repository.categories
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // ---- filters ----
 
@@ -160,7 +176,7 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
     }
 
     /** Builds a ready-to-paste prompt for an AI assistant from the selected foods. */
-    fun buildClipboardText(): String {
+    fun buildRecipePrompt(): String {
         val categoriesById = allCategories.value.associateBy { it.id }
         val selected = allFoods.value.filter { it.id in _selectedIds.value }
         if (selected.isEmpty()) return ""

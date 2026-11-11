@@ -30,7 +30,7 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
   - `Daos.kt`, `Converters.kt`, `FriezaDatabase.kt` (schema version 2, `MIGRATION_1_2`, default categories seeded in `onCreate`)
   - `FriezaRepository.kt`: the only data entry point for the UI (CRUD, transactions, selected-freezer preference, backup)
   - `BackupCodec.kt`: JSON export/import (all data, `"app": "frieza"`, `"version": 2`)
-- `ui/freezer/`: main screen (stacked, collapsible drawers; food chips colored by first category; search, category filter, sort; multi-select; clipboard export of an AI "recipe ideas" prompt) and its `FreezerViewModel`
+- `ui/freezer/`: main screen (stacked, collapsible drawers; food chips colored by first category; search, category filter, sort; multi-select; sharing of an AI "recipe ideas" prompt via the Android share sheet) and its `FreezerViewModel`
 - `ui/food/`: add/edit food form (also duplicate/delete)
 - `ui/setup/`: first-run / "new freezer" screen and the freezer edit screen (rename, drawers add/rename/reorder/delete)
 - `ui/category/`, `ui/shopping/`: category manager and shopping list
@@ -49,7 +49,7 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
 
 - No tabs per floor/drawer. The freezer is shown as vertically stacked drawers, each collapsible, all expanded by default so the whole content is visible at once.
 - Foods are colored chips grouped by drawer, with an expiry badge (expired / under 1 month / under 2 months) and an inline "Add" chip per drawer.
-- Long-press starts multi-selection across all drawers; the selection can be copied to the clipboard as a ready-to-paste prompt for any AI assistant (no API integration).
+- Long-press starts multi-selection across all drawers; the selection can be shared (Android share sheet, `ACTION_SEND`) as a ready-made prompt for any AI assistant (no API integration).
 
 ## Build, CI and releases
 
@@ -63,18 +63,19 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
 
 ## Git and GitHub conventions
 
-- Default branch is `main`. Work on feature branches (e.g. `feature/v2`) and open a pull request.
+- Default branch is `main`. Use a feature branch + pull request only for real code changes (anything the CI must validate before merging).
+- Small, low-risk edits (docs, README, CLAUDE.md, a single obvious fix) go straight to `main`: no branch, no PR. If the session forces a dedicated branch, say so to the owner instead of opening a PR for a trivial change.
 - Commit messages in English from now on, imperative mood, short subject.
 - In Claude Code on the web, the proxy blocks tag pushes, branch deletion and GraphQL; use the REST API (`gh api`) where allowed and tell the owner what they must do in the GitHub UI.
 
 ## Internationalization (planned)
 
-User-visible strings are currently hard-coded French literals in the Compose screens, in `FreezerViewModel.buildClipboardText()`, in `DefaultCategories`, in the default drawer names (`"Étage N"`) and in `util/` formatting. When internationalizing:
+User-visible strings are currently hard-coded French literals in the Compose screens, in `FreezerViewModel.buildRecipePrompt()`, in `DefaultCategories`, in the default drawer names (`"Étage N"`) and in `util/` formatting. When internationalizing:
 
 1. Move every UI string to `res/values/strings.xml` (English as default) and add `res/values-fr/strings.xml`; use `stringResource` / plurals.
 2. Default category and drawer names are written to the database at creation time. Decide whether to store keys and translate at display time, or to seed names in the language active at first launch; keep the existing French data working through the migration.
 3. Date and number formatting uses `Locale.FRANCE`; switch to the user's locale.
-4. The clipboard prompt for the AI assistant should follow the app language.
+4. The shared prompt for the AI assistant should follow the app language.
 5. Backup JSON field names stay language-neutral.
 
 ## Conventions

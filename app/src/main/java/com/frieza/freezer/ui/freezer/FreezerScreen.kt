@@ -1,5 +1,6 @@
 package com.frieza.freezer.ui.freezer
 
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -30,7 +31,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -61,7 +62,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,9 +71,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -116,8 +114,8 @@ fun FreezerScreen(
 
     val categoriesById = remember(state.categories) { state.categories.associateBy { it.id } }
 
-    // Each drawer's open/closed state. Defaults to expanded so everything is visible at once.
-    val expandedDrawers = remember { mutableStateMapOf<Long, Boolean>() }
+    // Drawers are expanded by default; collapsed ones are remembered by the ViewModel.
+    val collapsedDrawerIds by viewModel.collapsedDrawerIds.collectAsState()
 
     var showSearch by rememberSaveable { mutableStateOf(false) }
     var freezerMenuOpen by remember { mutableStateOf(false) }
@@ -126,7 +124,6 @@ fun FreezerScreen(
     var pendingImport by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -188,14 +185,19 @@ fun FreezerScreen(
                             Icon(Icons.Filled.SelectAll, contentDescription = "Tout sélectionner")
                         }
                         IconButton(onClick = {
-                            val text = viewModel.buildClipboardText()
+                            val text = viewModel.buildRecipePrompt()
                             if (text.isNotBlank()) {
-                                clipboardManager.setText(AnnotatedString(text))
+                                // Android share sheet: the user picks the target app (AI assistant,
+                                // notes, messages...). No network access from Frieza itself.
+                                val send = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, text)
+                                }
+                                context.startActivity(Intent.createChooser(send, "Partager les ingrédients"))
                                 viewModel.clearSelection()
-                                notify("Ingrédients copiés dans le presse-papier")
                             }
                         }) {
-                            Icon(Icons.Filled.ContentCopy, contentDescription = "Copier pour l'IA")
+                            Icon(Icons.Filled.Share, contentDescription = "Partager (idées de recettes)")
                         }
                         IconButton(onClick = { confirmDeleteSelection = true }) {
                             Icon(Icons.Filled.Delete, contentDescription = "Supprimer la sélection")
@@ -362,7 +364,7 @@ fun FreezerScreen(
                 // While filtering, drawers without a match are hidden.
                 if (state.filterActive && drawerUi.foods.isEmpty()) return@forEach
                 val drawerId = drawerUi.drawer.id
-                val isExpanded = expandedDrawers[drawerId] ?: true
+                val isExpanded = drawerId !in collapsedDrawerIds
 
                 DrawerSection(
                     name = drawerUi.drawer.name,
@@ -371,7 +373,7 @@ fun FreezerScreen(
                     filterActive = state.filterActive,
                     categoriesById = categoriesById,
                     isExpanded = isExpanded,
-                    onToggleExpanded = { expandedDrawers[drawerId] = !isExpanded },
+                    onToggleExpanded = { viewModel.toggleDrawerExpanded(drawerId) },
                     onAddFood = { onAddFood(drawerId) },
                     selectedIds = selectedIds,
                     isSelectionMode = isSelectionMode,
