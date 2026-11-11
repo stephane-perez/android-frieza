@@ -58,6 +58,20 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
     private val _selectedIds = MutableStateFlow<Set<Long>>(emptySet())
     val selectedIds: StateFlow<Set<Long>> = _selectedIds
 
+    /**
+     * Drawers the user collapsed. Kept in the ViewModel (not in composition) so the
+     * open/closed state survives navigating to the food form and back. Everything is
+     * expanded by default.
+     */
+    private val _collapsedDrawerIds = MutableStateFlow<Set<Long>>(emptySet())
+    val collapsedDrawerIds: StateFlow<Set<Long>> = _collapsedDrawerIds
+
+    fun toggleDrawerExpanded(drawerId: Long) {
+        _collapsedDrawerIds.value = _collapsedDrawerIds.value.let { current ->
+            if (drawerId in current) current - drawerId else current + drawerId
+        }
+    }
+
     val isSelectionMode: StateFlow<Boolean> = _selectedIds
         .map { it.isNotEmpty() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)

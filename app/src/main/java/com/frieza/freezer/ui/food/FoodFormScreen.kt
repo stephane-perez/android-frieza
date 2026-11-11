@@ -382,7 +382,16 @@ fun FoodFormScreen(
                 }) { Text("OK") }
             },
             dismissButton = {
-                TextButton(onClick = { pickTarget = PICK_NONE }) { Text("Annuler") }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Clears the date in one tap (instead of erasing the text field by hand).
+                    IconButton(onClick = {
+                        if (pickTarget == PICK_FREEZE) freezeMillis = null else expirationMillis = null
+                        pickTarget = PICK_NONE
+                    }) {
+                        Icon(Icons.Filled.Delete, contentDescription = "Effacer la date")
+                    }
+                    TextButton(onClick = { pickTarget = PICK_NONE }) { Text("Annuler") }
+                }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -403,7 +412,9 @@ private fun DateField(label: String, value: Long?, onPick: () -> Unit, onClear: 
                 Text(value?.let { formatDate(it) } ?: "Choisir une date")
             }
             if (value != null) {
-                TextButton(onClick = onClear) { Text("Effacer") }
+                IconButton(onClick = onClear) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Effacer la date")
+                }
             }
         }
     }

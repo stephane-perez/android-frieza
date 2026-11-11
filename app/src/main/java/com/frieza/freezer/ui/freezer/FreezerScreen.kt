@@ -61,7 +61,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -116,8 +115,8 @@ fun FreezerScreen(
 
     val categoriesById = remember(state.categories) { state.categories.associateBy { it.id } }
 
-    // Each drawer's open/closed state. Defaults to expanded so everything is visible at once.
-    val expandedDrawers = remember { mutableStateMapOf<Long, Boolean>() }
+    // Drawers are expanded by default; collapsed ones are remembered by the ViewModel.
+    val collapsedDrawerIds by viewModel.collapsedDrawerIds.collectAsState()
 
     var showSearch by rememberSaveable { mutableStateOf(false) }
     var freezerMenuOpen by remember { mutableStateOf(false) }
@@ -362,7 +361,7 @@ fun FreezerScreen(
                 // While filtering, drawers without a match are hidden.
                 if (state.filterActive && drawerUi.foods.isEmpty()) return@forEach
                 val drawerId = drawerUi.drawer.id
-                val isExpanded = expandedDrawers[drawerId] ?: true
+                val isExpanded = drawerId !in collapsedDrawerIds
 
                 DrawerSection(
                     name = drawerUi.drawer.name,
@@ -371,7 +370,7 @@ fun FreezerScreen(
                     filterActive = state.filterActive,
                     categoriesById = categoriesById,
                     isExpanded = isExpanded,
-                    onToggleExpanded = { expandedDrawers[drawerId] = !isExpanded },
+                    onToggleExpanded = { viewModel.toggleDrawerExpanded(drawerId) },
                     onAddFood = { onAddFood(drawerId) },
                     selectedIds = selectedIds,
                     isSelectionMode = isSelectionMode,
