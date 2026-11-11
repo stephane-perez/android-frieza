@@ -63,7 +63,8 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
 
 ## Git and GitHub conventions
 
-- Default branch is `main`. Work on feature branches (e.g. `feature/v2`) and open a pull request.
+- Default branch is `main`. Use a feature branch + pull request only for real code changes (anything the CI must validate before merging).
+- Small, low-risk edits (docs, README, CLAUDE.md, a single obvious fix) go straight to `main`: no branch, no PR. If the session forces a dedicated branch, say so to the owner instead of opening a PR for a trivial change.
 - Commit messages in English from now on, imperative mood, short subject.
 - In Claude Code on the web, the proxy blocks tag pushes, branch deletion and GraphQL; use the REST API (`gh api`) where allowed and tell the owner what they must do in the GitHub UI.
 
