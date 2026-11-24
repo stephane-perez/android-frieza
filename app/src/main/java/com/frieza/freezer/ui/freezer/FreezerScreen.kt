@@ -75,9 +75,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.frieza.freezer.R
+import com.frieza.freezer.ui.about.AboutDialog
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.frieza.freezer.data.Category
@@ -125,6 +128,7 @@ fun FreezerScreen(
     var overflowOpen by remember { mutableStateOf(false) }
     var confirmDeleteSelection by remember { mutableStateOf(false) }
     var pendingImport by remember { mutableStateOf<String?>(null) }
+    var showAbout by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -294,6 +298,11 @@ fun FreezerScreen(
                                         importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
                                     }
                                 )
+                                HorizontalDivider()
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.about_menu)) },
+                                    onClick = { overflowOpen = false; showAbout = true }
+                                )
                             }
                         }
                     }
@@ -408,6 +417,10 @@ fun FreezerScreen(
                 EmptyMessage("Aucun aliment ne correspond à la recherche.")
             }
         }
+    }
+
+    if (showAbout) {
+        AboutDialog(onDismiss = { showAbout = false })
     }
 
     if (confirmDeleteSelection) {
