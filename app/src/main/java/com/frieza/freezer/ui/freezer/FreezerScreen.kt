@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.UnfoldLess
+import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -54,6 +56,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -299,8 +302,21 @@ fun FreezerScreen(
         },
         floatingActionButton = {
             if (!isSelectionMode && state.drawers.isNotEmpty()) {
-                FloatingActionButton(onClick = { onAddFood(state.drawers.first().drawer.id) }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Ajouter un aliment")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SmallFloatingActionButton(onClick = { viewModel.expandAllDrawers() }) {
+                        Icon(Icons.Filled.UnfoldMore, contentDescription = "Tout ouvrir")
+                    }
+                    SmallFloatingActionButton(onClick = {
+                        viewModel.collapseAllDrawers(state.drawers.map { it.drawer.id })
+                    }) {
+                        Icon(Icons.Filled.UnfoldLess, contentDescription = "Tout fermer")
+                    }
+                    FloatingActionButton(onClick = { onAddFood(state.drawers.first().drawer.id) }) {
+                        Icon(Icons.Filled.Add, contentDescription = "Ajouter un aliment")
+                    }
                 }
             }
         }
