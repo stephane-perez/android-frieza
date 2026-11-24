@@ -1,5 +1,7 @@
 package com.frieza.freezer.data
 
+import androidx.annotation.StringRes
+import com.frieza.freezer.R
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -11,7 +13,8 @@ data class BackupData(
     val shopping: List<ShoppingItem>
 )
 
-data class DecodedBackup(val data: BackupData, val summary: String)
+/** Invalid backup; [messageRes] is a user-facing explanation. */
+class BackupFormatException(@StringRes val messageRes: Int) : IllegalArgumentException()
 
 /**
  * JSON backup format used to export and restore all the app's data.
@@ -67,21 +70,21 @@ object BackupCodec {
         return root.toString(1)
     }
 
-    fun decode(text: String): DecodedBackup {
+    fun decode(text: String): BackupData {
         val root = try {
             JSONObject(text.trim())
         } catch (e: Exception) {
-            throw IllegalArgumentException("Ce fichier n'est pas une sauvegarde valide (JSON illisible).")
+            throw BackupFormatException(R.string.backup_error_json)
         }
         return when {
             root.optString("app") == "frieza" -> decodeFrieza(root)
-            else -> throw IllegalArgumentException("Format de sauvegarde non reconnu.")
+            else -> throw BackupFormatException(R.string.backup_error_format)
         }
     }
 
     // ---------------------------------------------------------------- Frieza
 
-    private fun decodeFrieza(root: JSONObject): DecodedBackup {
+    private fun decodeFrieza(root: JSONObject): BackupData {
         try {
             val categories = root.arr("categories").objects().map {
                 Category(it.getLong("id"), it.getString("name"), it.getLong("color"), it.optInt("position", 0))
@@ -114,15 +117,11 @@ object BackupCodec {
             val shopping = root.arr("shopping").objects().map {
                 ShoppingItem(it.getLong("id"), it.getString("name"), it.optBoolean("checked", false))
             }
-            val data = BackupData(freezers, drawers, categories, cleanFoods, shopping)
-            return DecodedBackup(
-                data,
-                "${freezers.size} congélateur(s), ${cleanFoods.size} aliment(s), ${categories.size} catégorie(s)"
-            )
-        } catch (e: IllegalArgumentException) {
+            return BackupData(freezers, drawers, categories, cleanFoods, shopping)
+        } catch (e: BackupFormatException) {
             throw e
         } catch (e: Exception) {
-            throw IllegalArgumentException("Sauvegarde Frieza incomplète ou corrompue.")
+            throw BackupFormatException(R.string.backup_error_corrupt)
         }
     }
 

@@ -1,5 +1,8 @@
 package com.frieza.freezer.ui.food
 
+import androidx.compose.ui.platform.LocalContext
+import com.frieza.freezer.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,6 +81,7 @@ fun FoodFormScreen(
     onDone: () -> Unit
 ) {
     val isEditing = foodId != null
+    val res = LocalContext.current.resources
     val scope = rememberCoroutineScope()
 
     val freezers by repository.freezers.collectAsState(initial = emptyList<Freezer>())
@@ -133,10 +137,10 @@ fun FoodFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isEditing) "Modifier l'aliment" else "Ajouter un aliment") },
+                title = { Text(stringResource(if (isEditing) R.string.edit_food else R.string.add_food)) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -147,7 +151,7 @@ fun FoodFormScreen(
                                 onDone()
                             }
                         }) {
-                            Icon(Icons.Filled.ContentCopy, contentDescription = "Dupliquer")
+                            Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.duplicate))
                         }
                         IconButton(onClick = {
                             scope.launch {
@@ -155,7 +159,7 @@ fun FoodFormScreen(
                                 onDone()
                             }
                         }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Supprimer")
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
                         }
                     }
                 }
@@ -174,12 +178,12 @@ fun FoodFormScreen(
                 value = name,
                 onValueChange = { name = it },
                 singleLine = true,
-                label = { Text("Nom de l'aliment") },
+                label = { Text(stringResource(R.string.food_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Column {
-                Text("Catégories", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.categories), style = MaterialTheme.typography.labelLarge)
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(top = 8.dp)
@@ -216,7 +220,7 @@ fun FoodFormScreen(
                         value = freezers.firstOrNull { it.id == effectiveFreezerId }?.name ?: "",
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Congélateur") },
+                        label = { Text(stringResource(R.string.freezer)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = freezerExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -251,7 +255,7 @@ fun FoodFormScreen(
                     value = currentDrawer?.name ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Tiroir") },
+                    label = { Text(stringResource(R.string.drawer)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = drawerExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -274,7 +278,7 @@ fun FoodFormScreen(
             }
 
             Column {
-                Text("Quantité (optionnel)", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.quantity_optional), style = MaterialTheme.typography.labelLarge)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(top = 8.dp)
@@ -283,7 +287,7 @@ fun FoodFormScreen(
                         value = unitCountText,
                         onValueChange = { unitCountText = digitsOnly(it) },
                         singleLine = true,
-                        label = { Text("Nombre") },
+                        label = { Text(stringResource(R.string.unit_count)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
@@ -291,7 +295,7 @@ fun FoodFormScreen(
                         value = weightText,
                         onValueChange = { weightText = digitsOnly(it) },
                         singleLine = true,
-                        label = { Text("Poids (g)") },
+                        label = { Text(stringResource(R.string.weight_grams)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
@@ -299,7 +303,7 @@ fun FoodFormScreen(
                         value = portionsText,
                         onValueChange = { portionsText = digitsOnly(it) },
                         singleLine = true,
-                        label = { Text("Portions") },
+                        label = { Text(stringResource(R.string.portions)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
@@ -307,7 +311,7 @@ fun FoodFormScreen(
             }
 
             DateField(
-                label = "Date de congélation",
+                label = stringResource(R.string.freeze_date),
                 value = freezeMillis,
                 onPick = { pickTarget = PICK_FREEZE },
                 onClear = { freezeMillis = null }
@@ -315,7 +319,7 @@ fun FoodFormScreen(
 
             Column {
                 DateField(
-                    label = "À consommer avant le",
+                    label = stringResource(R.string.best_before),
                     value = expirationMillis,
                     onPick = { pickTarget = PICK_EXPIRATION },
                     onClear = { expirationMillis = null }
@@ -327,7 +331,7 @@ fun FoodFormScreen(
                     listOf(3, 6, 12).forEach { months ->
                         AssistChip(
                             onClick = { expirationMillis = addMonthsUtc(freezeMillis ?: todayUtcMillis(), months) },
-                            label = { Text("+$months mois") }
+                            label = { Text(res.getQuantityString(R.plurals.plus_months, months, months)) }
                         )
                     }
                 }
@@ -336,7 +340,7 @@ fun FoodFormScreen(
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it.take(180) },
-                label = { Text("Notes (optionnel)") },
+                label = { Text(stringResource(R.string.notes_optional)) },
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -364,7 +368,7 @@ fun FoodFormScreen(
                     }
                 }
             ) {
-                Text("Enregistrer")
+                Text(stringResource(R.string.save))
             }
         }
     }
@@ -379,7 +383,7 @@ fun FoodFormScreen(
                     val picked = datePickerState.selectedDateMillis
                     if (pickTarget == PICK_FREEZE) freezeMillis = picked else expirationMillis = picked
                     pickTarget = PICK_NONE
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.ok)) }
             },
             dismissButton = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -388,9 +392,9 @@ fun FoodFormScreen(
                         if (pickTarget == PICK_FREEZE) freezeMillis = null else expirationMillis = null
                         pickTarget = PICK_NONE
                     }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Effacer la date")
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.clear_date))
                     }
-                    TextButton(onClick = { pickTarget = PICK_NONE }) { Text("Annuler") }
+                    TextButton(onClick = { pickTarget = PICK_NONE }) { Text(stringResource(R.string.cancel)) }
                 }
             }
         ) {
@@ -409,11 +413,11 @@ private fun DateField(label: String, value: Long?, onPick: () -> Unit, onClear: 
             modifier = Modifier.padding(top = 8.dp)
         ) {
             OutlinedButton(onClick = onPick) {
-                Text(value?.let { formatDate(it) } ?: "Choisir une date")
+                Text(value?.let { formatDate(it) } ?: stringResource(R.string.pick_date))
             }
             if (value != null) {
                 IconButton(onClick = onClear) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Effacer la date")
+                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.clear_date))
                 }
             }
         }

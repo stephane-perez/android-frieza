@@ -2,6 +2,7 @@ package com.frieza.freezer.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.frieza.freezer.R
 
 @Entity(tableName = "freezers")
 data class Freezer(
@@ -52,17 +53,20 @@ data class ShoppingItem(
     val checked: Boolean = false
 )
 
-/** Categories created on first launch (same set as the first version of the app). */
+/**
+ * Categories created on first launch (same set as the first version of the app).
+ * Names are seeded in the language active at that time; existing names are never translated.
+ */
 object DefaultCategories {
-    val all: List<Pair<String, Long>> = listOf(
-        "Légumes" to 0xFF66BB6AL,
-        "Fruits" to 0xFF9CCC65L,
-        "Plats complets" to 0xFF7E57C2L,
-        "Viandes" to 0xFFE57373L,
-        "Poissons" to 0xFFEC7FA9L,
-        "Condiments" to 0xFFFFA726L,
-        "Pain / Pâtisserie" to 0xFF8D6E63L,
-        "Desserts / Glaces" to 0xFF26A69AL,
-        "Autre" to 0xFF78909CL
+    val all: List<Pair<Int, Long>> = listOf(
+        R.string.default_category_vegetables to 0xFF66BB6AL,
+        R.string.default_category_fruits to 0xFF9CCC65L,
+        R.string.default_category_meals to 0xFF7E57C2L,
+        R.string.default_category_meat to 0xFFE57373L,
+        R.string.default_category_fish to 0xFFEC7FA9L,
+        R.string.default_category_condiments to 0xFFFFA726L,
+        R.string.default_category_bread to 0xFF8D6E63L,
+        R.string.default_category_desserts to 0xFF26A69AL,
+        R.string.default_category_other to 0xFF78909CL
     )
 }

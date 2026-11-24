@@ -1,5 +1,6 @@
 package com.frieza.freezer.util
 
+import android.text.format.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -14,8 +15,12 @@ import java.util.concurrent.TimeUnit
 
 private val UTC: TimeZone = TimeZone.getTimeZone("UTC")
 
-fun formatDate(millis: Long): String =
-    SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE).apply { timeZone = UTC }.format(Date(millis))
+/** Numeric date in the phone's language order (e.g. 24/11/2026 in French, 11/24/2026 in US English). */
+fun formatDate(millis: Long): String {
+    val locale = Locale.getDefault()
+    val pattern = DateFormat.getBestDateTimePattern(locale, "ddMMyyyy")
+    return SimpleDateFormat(pattern, locale).apply { timeZone = UTC }.format(Date(millis))
+}
 
 /** Today's date (in the phone's time zone) expressed as UTC midnight. */
 fun todayUtcMillis(): Long {
@@ -44,5 +49,5 @@ fun formatWeight(grams: Int): String =
     if (grams < 1000) "$grams g"
     else {
         val kg = grams / 1000.0
-        "%.2f".format(Locale.FRANCE, kg).trimEnd('0').trimEnd(',') + " kg"
+        "%.2f".format(Locale.getDefault(), kg).trimEnd('0').trimEnd(',', '.') + " kg"
     }

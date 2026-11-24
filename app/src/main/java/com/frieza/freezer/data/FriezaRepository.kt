@@ -1,14 +1,18 @@
 package com.frieza.freezer.data
 
 import android.content.SharedPreferences
+import android.content.res.Resources
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.frieza.freezer.R
 
 class FriezaRepository(
     private val db: FriezaDatabase,
-    private val prefs: SharedPreferences
+    private val prefs: SharedPreferences,
+    /** Used only for default names written to the database (e.g. "Shelf 1"). */
+    private val resources: Resources
 ) {
     private val freezerDao = db.freezerDao()
     private val drawerDao = db.drawerDao()
@@ -49,7 +53,7 @@ class FriezaRepository(
             val freezerId = freezerDao.insert(Freezer(name = name.trim(), position = position))
             for (i in drawerCount downTo 1) {
                 drawerDao.insert(
-                    Drawer(freezerId = freezerId, name = "Étage $i", position = drawerCount - i)
+                    Drawer(freezerId = freezerId, name = resources.getString(R.string.default_floor_name, i), position = drawerCount - i)
                 )
             }
             freezerId
@@ -168,11 +172,11 @@ class FriezaRepository(
         )
     }
 
-    /** Replaces ALL data. Throws [IllegalArgumentException] (before touching anything) if invalid. */
-    suspend fun importBackup(text: String): String {
-        val result = BackupCodec.decode(text)
-        replaceAll(result.data)
-        return result.summary
+    /** Replaces ALL data and returns what was imported. Throws [BackupFormatException] (before touching anything) if invalid. */
+    suspend fun importBackup(text: String): BackupData {
+        val data = BackupCodec.decode(text)
+        replaceAll(data)
+        return data
     }
 
     private suspend fun replaceAll(data: BackupData) {

@@ -1,5 +1,7 @@
 package com.frieza.freezer.ui.setup
 
+import com.frieza.freezer.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.frieza.freezer.data.FriezaRepository
 import kotlinx.coroutines.launch
 
-/** Creates a freezer (first launch, or "Ajouter un congélateur"). */
+/** Creates a freezer (first launch, or "Add a freezer"). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
@@ -44,7 +46,8 @@ fun SetupScreen(
     onSaved: () -> Unit,
     onBack: () -> Unit
 ) {
-    var name by rememberSaveable { mutableStateOf(if (isFirstRun) "Congélateur" else "") }
+    val defaultName = stringResource(R.string.default_freezer_name)
+    var name by rememberSaveable { mutableStateOf(if (isFirstRun) defaultName else "") }
     var drawerCount by rememberSaveable { mutableIntStateOf(3) }
     val scope = rememberCoroutineScope()
 
@@ -52,10 +55,10 @@ fun SetupScreen(
         topBar = {
             if (!isFirstRun) {
                 TopAppBar(
-                    title = { Text("Nouveau congélateur") },
+                    title = { Text(stringResource(R.string.new_freezer)) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     }
                 )
@@ -80,7 +83,7 @@ fun SetupScreen(
 
             if (isFirstRun) {
                 Text(
-                    text = "Bienvenue dans Frieza",
+                    text = stringResource(R.string.welcome),
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
@@ -89,14 +92,14 @@ fun SetupScreen(
                 value = name,
                 onValueChange = { name = it },
                 singleLine = true,
-                label = { Text("Nom du congélateur") },
+                label = { Text(stringResource(R.string.freezer_name)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
             )
 
             Text(
-                text = "Combien de tiroirs / étages ?",
+                text = stringResource(R.string.how_many_drawers),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
             )
@@ -106,16 +109,16 @@ fun SetupScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 IconButton(onClick = { if (drawerCount > 1) drawerCount-- }) {
-                    Icon(Icons.Filled.Remove, contentDescription = "Moins de tiroirs")
+                    Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.fewer_drawers))
                 }
                 Text(text = drawerCount.toString(), style = MaterialTheme.typography.displayMedium)
                 IconButton(onClick = { if (drawerCount < 20) drawerCount++ }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Plus de tiroirs")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.more_drawers))
                 }
             }
 
             Text(
-                text = "Tu pourras renommer, réordonner, ajouter ou supprimer des tiroirs ensuite.",
+                text = stringResource(R.string.setup_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 16.dp)
@@ -133,7 +136,7 @@ fun SetupScreen(
                     }
                 }
             ) {
-                Text(if (isFirstRun) "Créer mon congélateur" else "Créer")
+                Text(stringResource(if (isFirstRun) R.string.create_my_freezer else R.string.create))
             }
         }
     }

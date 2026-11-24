@@ -1,5 +1,7 @@
 package com.frieza.freezer.ui.shopping
 
+import com.frieza.freezer.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -60,16 +62,16 @@ fun ShoppingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Liste de courses") },
+                title = { Text(stringResource(R.string.shopping_list)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     if (items.any { it.checked }) {
                         IconButton(onClick = { scope.launch { repository.clearCheckedShopping() } }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Retirer les articles cochés")
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.clear_checked))
                         }
                     }
                 }
@@ -89,11 +91,11 @@ fun ShoppingScreen(
                         value = newItem,
                         onValueChange = { newItem = it },
                         singleLine = true,
-                        label = { Text("Ajouter un article") },
+                        label = { Text(stringResource(R.string.add_item)) },
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = { submit() }, enabled = newItem.isNotBlank()) {
-                        Icon(Icons.Filled.Add, contentDescription = "Ajouter")
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add))
                     }
                 }
             }
@@ -119,10 +121,10 @@ fun ShoppingScreen(
                             scope.launch { repository.setShoppingChecked(item, true) }
                             onStoreInFreezer(item.name)
                         }) {
-                            Icon(Icons.Filled.Kitchen, contentDescription = "Ranger au congélateur")
+                            Icon(Icons.Filled.Kitchen, contentDescription = stringResource(R.string.store_in_freezer))
                         }
                         IconButton(onClick = { scope.launch { repository.deleteShoppingItem(item.id) } }) {
-                            Icon(Icons.Filled.Close, contentDescription = "Retirer")
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.remove))
                         }
                     }
                 }
@@ -130,7 +132,7 @@ fun ShoppingScreen(
             if (items.isEmpty()) {
                 item {
                     Text(
-                        "Rien à acheter pour le moment.",
+                        stringResource(R.string.shopping_empty),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(16.dp)
