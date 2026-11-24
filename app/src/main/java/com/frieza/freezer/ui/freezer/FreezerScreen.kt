@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.UnfoldLess
+import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -54,6 +56,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -72,9 +75,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.frieza.freezer.R
+import com.frieza.freezer.ui.about.AboutDialog
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.frieza.freezer.data.Category
@@ -122,6 +128,7 @@ fun FreezerScreen(
     var overflowOpen by remember { mutableStateOf(false) }
     var confirmDeleteSelection by remember { mutableStateOf(false) }
     var pendingImport by remember { mutableStateOf<String?>(null) }
+    var showAbout by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -291,6 +298,11 @@ fun FreezerScreen(
                                         importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
                                     }
                                 )
+                                HorizontalDivider()
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.about_menu)) },
+                                    onClick = { overflowOpen = false; showAbout = true }
+                                )
                             }
                         }
                     }
@@ -299,8 +311,21 @@ fun FreezerScreen(
         },
         floatingActionButton = {
             if (!isSelectionMode && state.drawers.isNotEmpty()) {
-                FloatingActionButton(onClick = { onAddFood(state.drawers.first().drawer.id) }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Ajouter un aliment")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SmallFloatingActionButton(onClick = { viewModel.expandAllDrawers() }) {
+                        Icon(Icons.Filled.UnfoldMore, contentDescription = "Tout ouvrir")
+                    }
+                    SmallFloatingActionButton(onClick = {
+                        viewModel.collapseAllDrawers(state.drawers.map { it.drawer.id })
+                    }) {
+                        Icon(Icons.Filled.UnfoldLess, contentDescription = "Tout fermer")
+                    }
+                    FloatingActionButton(onClick = { onAddFood(state.drawers.first().drawer.id) }) {
+                        Icon(Icons.Filled.Add, contentDescription = "Ajouter un aliment")
+                    }
                 }
             }
         }
@@ -392,6 +417,10 @@ fun FreezerScreen(
                 EmptyMessage("Aucun aliment ne correspond à la recherche.")
             }
         }
+    }
+
+    if (showAbout) {
+        AboutDialog(onDismiss = { showAbout = false })
     }
 
     if (confirmDeleteSelection) {

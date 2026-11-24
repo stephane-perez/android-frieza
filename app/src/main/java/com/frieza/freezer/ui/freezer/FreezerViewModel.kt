@@ -72,6 +72,14 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
         }
     }
 
+    fun expandAllDrawers() {
+        _collapsedDrawerIds.value = emptySet()
+    }
+
+    fun collapseAllDrawers(drawerIds: Collection<Long>) {
+        _collapsedDrawerIds.value = _collapsedDrawerIds.value + drawerIds
+    }
+
     val isSelectionMode: StateFlow<Boolean> = _selectedIds
         .map { it.isNotEmpty() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)

@@ -1,0 +1,8 @@
+<resources>
+    <!-- About dialog -->
+    <string name="about_menu">À propos de Frieza</string>
+    <string name="about_version">Frieza v%1$s</string>
+    <string name="about_authors">Par Stéphane Perez et Claude Code</string>
+    <string name="about_source">Documentation et code source :</string>
+    <string name="about_close">OK</string>
+</resources>

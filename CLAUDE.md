@@ -34,6 +34,7 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
 - `ui/food/`: add/edit food form (also duplicate/delete)
 - `ui/setup/`: first-run / "new freezer" screen and the freezer edit screen (rename, drawers add/rename/reorder/delete)
 - `ui/category/`, `ui/shopping/`: category manager and shopping list
+- `ui/about/`: "About" dialog (version read from the package, authors, repository link), opened from the main screen's overflow menu
 - `ui/navigation/FriezaNavGraph.kt`: routes; start destination depends on whether a freezer exists
 - `util/`: date helpers (`Dates.kt`) and food text formatting (`FoodText.kt`)
 
@@ -70,7 +71,7 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
 
 ## Internationalization (planned)
 
-User-visible strings are currently hard-coded French literals in the Compose screens, in `FreezerViewModel.buildRecipePrompt()`, in `DefaultCategories`, in the default drawer names (`"Étage N"`) and in `util/` formatting. When internationalizing:
+The About dialog already uses `res/values/strings.xml` (English) + `res/values-fr/strings.xml`; follow that pattern for new strings. Other user-visible strings are still hard-coded French literals in the Compose screens, in `FreezerViewModel.buildRecipePrompt()`, in `DefaultCategories`, in the default drawer names (`"Étage N"`) and in `util/` formatting. When internationalizing:
 
 1. Move every UI string to `res/values/strings.xml` (English as default) and add `res/values-fr/strings.xml`; use `stringResource` / plurals.
 2. Default category and drawer names are written to the database at creation time. Decide whether to store keys and translate at display time, or to seed names in the language active at first launch; keep the existing French data working through the migration.

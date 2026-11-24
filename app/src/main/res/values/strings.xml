@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Frieza</string>
+
+    <!-- About dialog -->
+    <string name="about_menu">About Frieza</string>
+    <string name="about_version">Frieza v%1$s</string>
+    <string name="about_authors">By Stéphane Perez and Claude Code</string>
+    <string name="about_source">Documentation and source code:</string>
+    <string name="about_close">OK</string>
 </resources>
