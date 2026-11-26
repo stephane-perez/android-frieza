@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.frieza.freezer.R
 
 @Database(
     entities = [Freezer::class, Drawer::class, Category::class, Food::class, ShoppingItem::class],
@@ -27,26 +28,28 @@ abstract class FriezaDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): FriezaDatabase =
             INSTANCE ?: synchronized(this) {
-                INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    FriezaDatabase::class.java,
-                    "frieza.db"
-                )
-                    .addMigrations(MIGRATION_1_2)
-                    .addCallback(object : RoomDatabase.Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            seedCategories(db)
-                        }
-                    })
-                    .build()
-                    .also { INSTANCE = it }
+                INSTANCE ?: buildDatabase(context.applicationContext).also { INSTANCE = it }
             }
 
-        private fun seedCategories(db: SupportSQLiteDatabase) {
-            DefaultCategories.all.forEachIndexed { index, (name, color) ->
+        private fun buildDatabase(context: Context): FriezaDatabase =
+            Room.databaseBuilder(
+                context.applicationContext,
+                FriezaDatabase::class.java,
+                "frieza.db"
+            )
+                .addMigrations(migration1To2(context))
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        seedCategories(db, context)
+                    }
+                })
+                .build()
+
+        private fun seedCategories(db: SupportSQLiteDatabase, context: Context) {
+            DefaultCategories.all.forEachIndexed { index, (nameRes, color) ->
                 db.execSQL(
                     "INSERT INTO categories (name, color, position) VALUES (?, ?, ?)",
-                    arrayOf<Any?>(name, color, index.toLong())
+                    arrayOf<Any?>(context.getString(nameRes), color, index.toLong())
                 )
             }
         }
@@ -54,27 +57,31 @@ abstract class FriezaDatabase : RoomDatabase() {
         /**
          * v1 had one implicit freezer (floorCount) and foods with `floor` + a fixed category enum.
          * v2 has freezers, named drawers, user categories and richer quantities/dates.
-         * Existing data is preserved: floor N becomes drawer "Étage N" of freezer "Congélateur".
+         * Existing data is preserved: floor N becomes drawer "Shelf N" of freezer "Freezer"
+         * (names in the phone's language at migration time).
          */
-        val MIGRATION_1_2 = object : Migration(1, 2) {
+        fun migration1To2(context: Context) = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS `freezers` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `position` INTEGER NOT NULL)")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `drawers` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `freezerId` INTEGER NOT NULL, `name` TEXT NOT NULL, `position` INTEGER NOT NULL)")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `categories` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `color` INTEGER NOT NULL, `position` INTEGER NOT NULL)")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `shopping_items` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `checked` INTEGER NOT NULL)")
 
-                seedCategories(db)
+                seedCategories(db, context)
 
                 var floorCount = 0
                 db.query("SELECT floorCount FROM freezer_config WHERE id = 0").use { cursor ->
                     if (cursor.moveToFirst()) floorCount = cursor.getInt(0)
                 }
                 if (floorCount > 0) {
-                    db.execSQL("INSERT INTO freezers (id, name, position) VALUES (1, 'Congélateur', 0)")
+                    db.execSQL(
+                        "INSERT INTO freezers (id, name, position) VALUES (1, ?, 0)",
+                        arrayOf<Any?>(context.getString(R.string.default_freezer_name))
+                    )
                     for (floor in 1..floorCount) {
                         db.execSQL(
                             "INSERT INTO drawers (id, freezerId, name, position) VALUES (?, 1, ?, ?)",
-                            arrayOf<Any?>(floor.toLong(), "Étage $floor", (floorCount - floor).toLong())
+                            arrayOf<Any?>(floor.toLong(), context.getString(R.string.default_floor_name, floor), (floorCount - floor).toLong())
                         )
                     }
                 }

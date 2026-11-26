@@ -1,7 +1,11 @@
 package com.frieza.freezer.ui.freezer
 
+import android.content.res.Resources
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
+import com.frieza.freezer.R
 import androidx.lifecycle.viewModelScope
+import com.frieza.freezer.data.BackupData
 import com.frieza.freezer.data.Category
 import com.frieza.freezer.data.Drawer
 import com.frieza.freezer.data.Food
@@ -17,10 +21,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-enum class SortMode(val label: String) {
-    NAME("Nom"),
-    EXPIRATION("Péremption"),
-    RECENT("Ajout récent")
+enum class SortMode(@StringRes val labelRes: Int) {
+    NAME(R.string.sort_name),
+    EXPIRATION(R.string.sort_expiration),
+    RECENT(R.string.sort_recent)
 }
 
 data class DrawerUi(val drawer: Drawer, val foods: List<Food>, val totalCount: Int)
@@ -177,14 +181,14 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
 
     suspend fun exportBackup(): String = repository.exportBackup()
 
-    suspend fun importBackup(text: String): String {
+    suspend fun importBackup(text: String): BackupData {
         clearFilters()
         clearSelection()
         return repository.importBackup(text)
     }
 
     /** Builds a ready-to-paste prompt for an AI assistant from the selected foods. */
-    fun buildRecipePrompt(): String {
+    fun buildRecipePrompt(res: Resources): String {
         val categoriesById = allCategories.value.associateBy { it.id }
         val selected = allFoods.value.filter { it.id in _selectedIds.value }
         if (selected.isEmpty()) return ""
@@ -192,15 +196,13 @@ class FreezerViewModel(private val repository: FriezaRepository) : ViewModel() {
         val lines = selected.joinToString("\n") { food ->
             val details = listOfNotNull(
                 food.categoryIds.mapNotNull { categoriesById[it]?.name }.joinToString(" / ").takeIf { it.isNotBlank() },
-                quantityText(food).takeIf { it.isNotBlank() }
+                quantityText(food, res).takeIf { it.isNotBlank() }
             ).joinToString(", ")
             val detailsText = if (details.isNotBlank()) " ($details)" else ""
-            val expiration = food.expirationDate?.let { " – à consommer avant le ${formatDate(it)}" } ?: ""
+            val expiration = food.expirationDate?.let { " – " + res.getString(R.string.prompt_best_before, formatDate(it)) } ?: ""
             "- ${food.name}$detailsText$expiration"
         }
 
-        return "Voici les ingrédients dont je dispose au congélateur :\n$lines\n\n" +
-            "Propose-moi 3 idées de recettes réalisables avec ces ingrédients " +
-            "(je peux compléter avec des produits de base comme sel, huile, épices)."
+        return res.getString(R.string.prompt_intro) + "\n$lines\n\n" + res.getString(R.string.prompt_request)
     }
 }

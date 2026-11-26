@@ -1,5 +1,7 @@
 package com.frieza.freezer.ui.category
 
+import com.frieza.freezer.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,17 +71,17 @@ fun CategoriesScreen(repository: FriezaRepository, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Catégories") },
+                title = { Text(stringResource(R.string.categories)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { dialog = CategoryDialog.Create }) {
-                Icon(Icons.Filled.Add, contentDescription = "Nouvelle catégorie")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.new_category))
             }
         }
     ) { padding ->
@@ -111,17 +113,17 @@ fun CategoriesScreen(repository: FriezaRepository, onBack: () -> Unit) {
                                 .padding(start = 16.dp)
                         )
                         IconButton(onClick = { dialog = CategoryDialog.Edit(category) }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Modifier")
+                            Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit))
                         }
                         IconButton(onClick = { dialog = CategoryDialog.Delete(category) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Supprimer")
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
                         }
                     }
                 }
             }
             item {
                 Text(
-                    "Un aliment peut avoir plusieurs catégories ; la première donne sa couleur.",
+                    stringResource(R.string.category_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(8.dp)
@@ -133,7 +135,7 @@ fun CategoriesScreen(repository: FriezaRepository, onBack: () -> Unit) {
     when (val d = dialog) {
         null -> Unit
         is CategoryDialog.Create -> CategoryEditorDialog(
-            title = "Nouvelle catégorie",
+            title = stringResource(R.string.new_category),
             initialName = "",
             initialColor = CategoryPalette[11],
             onDismiss = { dialog = null },
@@ -143,7 +145,7 @@ fun CategoriesScreen(repository: FriezaRepository, onBack: () -> Unit) {
             }
         )
         is CategoryDialog.Edit -> CategoryEditorDialog(
-            title = "Modifier la catégorie",
+            title = stringResource(R.string.edit_category),
             initialName = d.category.name,
             initialColor = d.category.color,
             onDismiss = { dialog = null },
@@ -154,15 +156,15 @@ fun CategoriesScreen(repository: FriezaRepository, onBack: () -> Unit) {
         )
         is CategoryDialog.Delete -> AlertDialog(
             onDismissRequest = { dialog = null },
-            title = { Text("Supprimer « ${d.category.name} » ?") },
-            text = { Text("Elle sera retirée des aliments qui l'utilisent (les aliments ne sont pas supprimés).") },
+            title = { Text(stringResource(R.string.delete_named, d.category.name)) },
+            text = { Text(stringResource(R.string.category_delete_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     dialog = null
                     scope.launch { repository.deleteCategory(d.category.id) }
-                }) { Text("Supprimer") }
+                }) { Text(stringResource(R.string.delete)) }
             },
-            dismissButton = { TextButton(onClick = { dialog = null }) { Text("Annuler") } }
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 }
@@ -191,7 +193,7 @@ private fun CategoryEditorDialog(
                     value = name,
                     onValueChange = { name = it },
                     singleLine = true,
-                    label = { Text("Nom") },
+                    label = { Text(stringResource(R.string.name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 FlowRow(
@@ -208,7 +210,7 @@ private fun CategoryEditorDialog(
                             contentAlignment = Alignment.Center
                         ) {
                             if (selected) {
-                                Icon(Icons.Filled.Check, contentDescription = "Choisie", tint = Color.White)
+                                Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.color_selected), tint = Color.White)
                             }
                         }
                     }
@@ -216,8 +218,8 @@ private fun CategoryEditorDialog(
             }
         },
         confirmButton = {
-            TextButton(enabled = name.isNotBlank(), onClick = { onConfirm(name, color) }) { Text("OK") }
+            TextButton(enabled = name.isNotBlank(), onClick = { onConfirm(name, color) }) { Text(stringResource(R.string.ok)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
 }

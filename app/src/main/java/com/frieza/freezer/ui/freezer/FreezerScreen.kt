@@ -83,6 +83,7 @@ import com.frieza.freezer.R
 import com.frieza.freezer.ui.about.AboutDialog
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.frieza.freezer.data.BackupFormatException
 import com.frieza.freezer.data.Category
 import com.frieza.freezer.data.Food
 import com.frieza.freezer.data.FriezaRepository
@@ -131,6 +132,7 @@ fun FreezerScreen(
     var showAbout by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val res = context.resources
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -147,11 +149,11 @@ fun FreezerScreen(
                     val json = viewModel.exportBackup()
                     withContext(Dispatchers.IO) {
                         context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(json.toByteArray()) }
-                            ?: error("flux indisponible")
+                            ?: error("output stream unavailable")
                     }
-                    notify("Sauvegarde enregistrée")
+                    notify(res.getString(R.string.export_saved))
                 } catch (e: Exception) {
-                    notify("Échec de l'export")
+                    notify(res.getString(R.string.export_failed))
                 }
             }
         }
@@ -169,7 +171,7 @@ fun FreezerScreen(
                 } catch (e: Exception) {
                     null
                 }
-                if (text.isNullOrBlank()) notify("Impossible de lire ce fichier") else pendingImport = text
+                if (text.isNullOrBlank()) notify(res.getString(R.string.import_unreadable)) else pendingImport = text
             }
         }
     }
@@ -179,20 +181,20 @@ fun FreezerScreen(
         topBar = {
             if (isSelectionMode) {
                 TopAppBar(
-                    title = { Text("${selectedIds.size} sélectionné(s)") },
+                    title = { Text(res.getQuantityString(R.plurals.selected_count, selectedIds.size, selectedIds.size)) },
                     navigationIcon = {
                         IconButton(onClick = { viewModel.clearSelection() }) {
-                            Icon(Icons.Filled.Close, contentDescription = "Annuler la sélection")
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel_selection))
                         }
                     },
                     actions = {
                         IconButton(onClick = {
                             viewModel.selectAll(state.drawers.flatMap { d -> d.foods.map { it.id } })
                         }) {
-                            Icon(Icons.Filled.SelectAll, contentDescription = "Tout sélectionner")
+                            Icon(Icons.Filled.SelectAll, contentDescription = stringResource(R.string.select_all))
                         }
                         IconButton(onClick = {
-                            val text = viewModel.buildRecipePrompt()
+                            val text = viewModel.buildRecipePrompt(res)
                             if (text.isNotBlank()) {
                                 // Android share sheet: the user picks the target app (AI assistant,
                                 // notes, messages...). No network access from Frieza itself.
@@ -200,14 +202,14 @@ fun FreezerScreen(
                                     type = "text/plain"
                                     putExtra(Intent.EXTRA_TEXT, text)
                                 }
-                                context.startActivity(Intent.createChooser(send, "Partager les ingrédients"))
+                                context.startActivity(Intent.createChooser(send, res.getString(R.string.share_chooser_title)))
                                 viewModel.clearSelection()
                             }
                         }) {
-                            Icon(Icons.Filled.Share, contentDescription = "Partager (idées de recettes)")
+                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.share_recipe_ideas))
                         }
                         IconButton(onClick = { confirmDeleteSelection = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Supprimer la sélection")
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete_selection))
                         }
                     }
                 )
@@ -221,7 +223,7 @@ fun FreezerScreen(
                                 modifier = Modifier.clickable(enabled = canSwitch) { freezerMenuOpen = true }
                             ) {
                                 Text(state.current?.name ?: "Frieza")
-                                if (canSwitch) Icon(Icons.Filled.ArrowDropDown, contentDescription = "Changer de congélateur")
+                                if (canSwitch) Icon(Icons.Filled.ArrowDropDown, contentDescription = stringResource(R.string.switch_freezer))
                             }
                             DropdownMenu(expanded = freezerMenuOpen, onDismissRequest = { freezerMenuOpen = false }) {
                                 state.freezers.forEach { freezer ->
@@ -244,16 +246,16 @@ fun FreezerScreen(
                             showSearch = !showSearch
                             if (!showSearch) viewModel.clearFilters()
                         }) {
-                            Icon(Icons.Filled.Search, contentDescription = "Rechercher")
+                            Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search))
                         }
                         Box {
                             IconButton(onClick = { overflowOpen = true }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.menu))
                             }
                             DropdownMenu(expanded = overflowOpen, onDismissRequest = { overflowOpen = false }) {
                                 SortMode.entries.forEach { mode ->
                                     DropdownMenuItem(
-                                        text = { Text("Trier : ${mode.label}") },
+                                        text = { Text(stringResource(R.string.sort_by, stringResource(mode.labelRes))) },
                                         leadingIcon = {
                                             if (sort == mode) Icon(Icons.Filled.Check, contentDescription = null)
                                         },
@@ -265,34 +267,34 @@ fun FreezerScreen(
                                 }
                                 HorizontalDivider()
                                 DropdownMenuItem(
-                                    text = { Text("Liste de courses") },
+                                    text = { Text(stringResource(R.string.shopping_list)) },
                                     onClick = { overflowOpen = false; onShopping() }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Catégories") },
+                                    text = { Text(stringResource(R.string.categories)) },
                                     onClick = { overflowOpen = false; onCategories() }
                                 )
                                 HorizontalDivider()
                                 state.current?.let { current ->
                                     DropdownMenuItem(
-                                        text = { Text("Modifier « ${current.name} »") },
+                                        text = { Text(stringResource(R.string.edit_freezer_named, current.name)) },
                                         onClick = { overflowOpen = false; onEditFreezer(current.id) }
                                     )
                                 }
                                 DropdownMenuItem(
-                                    text = { Text("Ajouter un congélateur") },
+                                    text = { Text(stringResource(R.string.add_freezer)) },
                                     onClick = { overflowOpen = false; onAddFreezer() }
                                 )
                                 HorizontalDivider()
                                 DropdownMenuItem(
-                                    text = { Text("Exporter une sauvegarde") },
+                                    text = { Text(stringResource(R.string.export_backup)) },
                                     onClick = {
                                         overflowOpen = false
                                         exportLauncher.launch("frieza-${toIsoDate(todayUtcMillis())}.json")
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Importer une sauvegarde") },
+                                    text = { Text(stringResource(R.string.import_backup)) },
                                     onClick = {
                                         overflowOpen = false
                                         importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
@@ -316,15 +318,15 @@ fun FreezerScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     SmallFloatingActionButton(onClick = { viewModel.expandAllDrawers() }) {
-                        Icon(Icons.Filled.UnfoldMore, contentDescription = "Tout ouvrir")
+                        Icon(Icons.Filled.UnfoldMore, contentDescription = stringResource(R.string.expand_all))
                     }
                     SmallFloatingActionButton(onClick = {
                         viewModel.collapseAllDrawers(state.drawers.map { it.drawer.id })
                     }) {
-                        Icon(Icons.Filled.UnfoldLess, contentDescription = "Tout fermer")
+                        Icon(Icons.Filled.UnfoldLess, contentDescription = stringResource(R.string.collapse_all))
                     }
                     FloatingActionButton(onClick = { onAddFood(state.drawers.first().drawer.id) }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Ajouter un aliment")
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_food))
                     }
                 }
             }
@@ -342,11 +344,11 @@ fun FreezerScreen(
                     value = query,
                     onValueChange = { viewModel.setQuery(it) },
                     singleLine = true,
-                    label = { Text("Rechercher un aliment") },
+                    label = { Text(stringResource(R.string.search_food)) },
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = { viewModel.setQuery("") }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Effacer")
+                                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.clear))
                             }
                         }
                     },
@@ -377,7 +379,7 @@ fun FreezerScreen(
                 }
                 if (state.filterActive) {
                     Text(
-                        text = "${state.matchCount} résultat(s)",
+                        text = res.getQuantityString(R.plurals.results_count, state.matchCount, state.matchCount),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
@@ -410,11 +412,11 @@ fun FreezerScreen(
             }
 
             if (state.current != null && state.drawers.isEmpty()) {
-                EmptyMessage("Ce congélateur n'a pas encore de tiroir.\nOuvre le menu ⋮ puis « Modifier » pour en ajouter.")
+                EmptyMessage(stringResource(R.string.empty_no_drawer))
             } else if (state.drawers.isNotEmpty() && state.drawers.all { it.totalCount == 0 }) {
-                EmptyMessage("Ton congélateur est vide.\nAppuie sur + pour ajouter un aliment.")
+                EmptyMessage(stringResource(R.string.empty_freezer))
             } else if (state.filterActive && state.matchCount == 0) {
-                EmptyMessage("Aucun aliment ne correspond à la recherche.")
+                EmptyMessage(stringResource(R.string.empty_no_match))
             }
         }
     }
@@ -426,16 +428,16 @@ fun FreezerScreen(
     if (confirmDeleteSelection) {
         AlertDialog(
             onDismissRequest = { confirmDeleteSelection = false },
-            title = { Text("Supprimer ${selectedIds.size} aliment(s) ?") },
-            text = { Text("Cette action est définitive.") },
+            title = { Text(res.getQuantityString(R.plurals.delete_foods_title, selectedIds.size, selectedIds.size)) },
+            text = { Text(stringResource(R.string.action_irreversible)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDeleteSelection = false
                     viewModel.deleteSelected()
-                }) { Text("Supprimer") }
+                }) { Text(stringResource(R.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmDeleteSelection = false }) { Text("Annuler") }
+                TextButton(onClick = { confirmDeleteSelection = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -443,30 +445,34 @@ fun FreezerScreen(
     pendingImport?.let { text ->
         AlertDialog(
             onDismissRequest = { pendingImport = null },
-            title = { Text("Importer cette sauvegarde ?") },
+            title = { Text(stringResource(R.string.import_title)) },
             text = {
-                Text(
-                    "Toutes les données actuelles (congélateurs, aliments, catégories, liste de courses) " +
-                        "seront remplacées. Pense à exporter d'abord si tu veux les conserver."
-                )
+                Text(stringResource(R.string.import_message))
             },
             confirmButton = {
                 TextButton(onClick = {
                     pendingImport = null
                     scope.launch {
                         try {
-                            val summary = viewModel.importBackup(text)
-                            notify("Importé : $summary")
-                        } catch (e: IllegalArgumentException) {
-                            notify(e.message ?: "Sauvegarde invalide")
+                            val data = viewModel.importBackup(text)
+                            notify(
+                                res.getString(
+                                    R.string.import_done,
+                                    res.getQuantityString(R.plurals.freezers_count, data.freezers.size, data.freezers.size),
+                                    res.getQuantityString(R.plurals.foods_count, data.foods.size, data.foods.size),
+                                    res.getQuantityString(R.plurals.categories_count, data.categories.size, data.categories.size)
+                                )
+                            )
+                        } catch (e: BackupFormatException) {
+                            notify(res.getString(e.messageRes))
                         } catch (e: Exception) {
-                            notify("Échec de l'import")
+                            notify(res.getString(R.string.import_failed))
                         }
                     }
-                }) { Text("Remplacer") }
+                }) { Text(stringResource(R.string.replace)) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingImport = null }) { Text("Annuler") }
+                TextButton(onClick = { pendingImport = null }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -504,6 +510,7 @@ private fun DrawerSection(
     onFoodClick: (Food) -> Unit,
     onFoodLongClick: (Food) -> Unit
 ) {
+    val res = LocalContext.current.resources
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -532,9 +539,9 @@ private fun DrawerSection(
                         Text(text = name, style = MaterialTheme.typography.titleMedium)
                         Text(
                             text = when {
-                                totalCount == 0 -> "Vide"
-                                filterActive -> "${foods.size} / $totalCount aliment(s)"
-                                else -> "$totalCount aliment(s)"
+                                totalCount == 0 -> stringResource(R.string.drawer_empty)
+                                filterActive -> res.getQuantityString(R.plurals.drawer_count_filtered, totalCount, foods.size, totalCount)
+                                else -> res.getQuantityString(R.plurals.foods_count, totalCount, totalCount)
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -544,7 +551,7 @@ private fun DrawerSection(
 
                 Icon(
                     imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    contentDescription = if (isExpanded) "Replier" else "Déplier"
+                    contentDescription = stringResource(if (isExpanded) R.string.collapse else R.string.expand)
                 )
             }
 
@@ -588,9 +595,10 @@ private fun FoodChip(
     val categories = food.categoryIds.mapNotNull { categoriesById[it] }
     val background = Color(categories.firstOrNull()?.color ?: FALLBACK_COLOR)
     val foreground = if (background.luminance() > 0.6f) Color.Black else Color.White
-    val quantity = quantityText(food)
+    val res = LocalContext.current.resources
+    val quantity = quantityText(food, res)
     val label = if (quantity.isNotBlank()) "${food.name} - $quantity" else food.name
-    val badge = expirationBadge(food.expirationDate)
+    val badge = expirationBadge(food.expirationDate, res)
 
     Surface(
         shape = RoundedCornerShape(10.dp),
@@ -660,7 +668,7 @@ private fun AddChip(onClick: () -> Unit) {
                 contentDescription = null,
                 modifier = Modifier.padding(end = 4.dp)
             )
-            Text("Ajouter", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.add), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

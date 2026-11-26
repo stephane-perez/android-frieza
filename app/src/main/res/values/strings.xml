@@ -1,10 +1,184 @@
 <resources>
     <string name="app_name">Frieza</string>
 
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="rename">Rename</string>
+    <string name="add">Add</string>
+    <string name="clear">Clear</string>
+    <string name="remove">Remove</string>
+    <string name="delete_named">Delete “%1$s”?</string>
+    <string name="action_irreversible">This cannot be undone.</string>
+
+    <plurals name="foods_count">
+        <item quantity="one">%d food</item>
+        <item quantity="other">%d foods</item>
+    </plurals>
+    <plurals name="freezers_count">
+        <item quantity="one">%d freezer</item>
+        <item quantity="other">%d freezers</item>
+    </plurals>
+    <plurals name="categories_count">
+        <item quantity="one">%d category</item>
+        <item quantity="other">%d categories</item>
+    </plurals>
+
+    <!-- Default names written to the database at creation time -->
+    <string name="default_freezer_name">Freezer</string>
+    <string name="default_floor_name">Shelf %d</string>
+    <string name="default_drawer_name">Drawer %d</string>
+    <string name="default_category_vegetables">Vegetables</string>
+    <string name="default_category_fruits">Fruit</string>
+    <string name="default_category_meals">Ready meals</string>
+    <string name="default_category_meat">Meat</string>
+    <string name="default_category_fish">Fish</string>
+    <string name="default_category_condiments">Condiments</string>
+    <string name="default_category_bread">Bread / Pastry</string>
+    <string name="default_category_desserts">Desserts / Ice cream</string>
+    <string name="default_category_other">Other</string>
+
+    <!-- Main screen -->
+    <plurals name="selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <string name="cancel_selection">Cancel selection</string>
+    <string name="select_all">Select all</string>
+    <string name="share_chooser_title">Share ingredients</string>
+    <string name="share_recipe_ideas">Share (recipe ideas)</string>
+    <string name="delete_selection">Delete selection</string>
+    <string name="switch_freezer">Switch freezer</string>
+    <string name="search">Search</string>
+    <string name="menu">Menu</string>
+    <string name="sort_by">Sort: %1$s</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_expiration">Expiry</string>
+    <string name="sort_recent">Recently added</string>
+    <string name="shopping_list">Shopping list</string>
+    <string name="categories">Categories</string>
+    <string name="edit_freezer_named">Edit “%1$s”</string>
+    <string name="add_freezer">Add a freezer</string>
+    <string name="export_backup">Export a backup</string>
+    <string name="import_backup">Import a backup</string>
+    <string name="expand_all">Expand all</string>
+    <string name="collapse_all">Collapse all</string>
+    <string name="add_food">Add a food</string>
+    <string name="search_food">Search for a food</string>
+    <plurals name="results_count">
+        <item quantity="one">%d result</item>
+        <item quantity="other">%d results</item>
+    </plurals>
+    <string name="empty_no_drawer">This freezer has no drawer yet.\nOpen the ⋮ menu, then “Edit”, to add some.</string>
+    <string name="empty_freezer">Your freezer is empty.\nTap + to add a food.</string>
+    <string name="empty_no_match">No food matches your search.</string>
+    <plurals name="delete_foods_title">
+        <item quantity="one">Delete %d food?</item>
+        <item quantity="other">Delete %d foods?</item>
+    </plurals>
+    <string name="export_saved">Backup saved</string>
+    <string name="export_failed">Export failed</string>
+    <string name="import_unreadable">Unable to read this file</string>
+    <string name="import_title">Import this backup?</string>
+    <string name="import_message">All current data (freezers, foods, categories, shopping list) will be replaced. Export first if you want to keep it.</string>
+    <string name="import_done">Imported: %1$s, %2$s, %3$s</string>
+    <string name="import_failed">Import failed</string>
+    <string name="replace">Replace</string>
+    <string name="backup_error_json">This file is not a valid backup (unreadable JSON).</string>
+    <string name="backup_error_format">Unrecognized backup format.</string>
+    <string name="backup_error_corrupt">Incomplete or corrupted Frieza backup.</string>
+    <string name="drawer_empty">Empty</string>
+    <plurals name="drawer_count_filtered">
+        <item quantity="one">%1$d / %2$d food</item>
+        <item quantity="other">%1$d / %2$d foods</item>
+    </plurals>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
+
+    <!-- AI recipe prompt -->
+    <string name="prompt_intro">Here are the ingredients I have in my freezer:</string>
+    <string name="prompt_best_before">best before %1$s</string>
+    <string name="prompt_request">Suggest 3 recipe ideas I can make with these ingredients (I can add basic staples such as salt, oil and spices).</string>
+
+    <!-- Expiry badges and quantities -->
+    <string name="badge_expired">Expired</string>
+    <string name="badge_under_1_month">&lt;1 month</string>
+    <string name="badge_under_2_months">&lt;2 months</string>
+    <plurals name="portions_count">
+        <item quantity="one">%d portion</item>
+        <item quantity="other">%d portions</item>
+    </plurals>
+
+    <!-- Food form -->
+    <string name="edit_food">Edit food</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="food_name">Food name</string>
+    <string name="freezer">Freezer</string>
+    <string name="drawer">Drawer</string>
+    <string name="quantity_optional">Quantity (optional)</string>
+    <string name="unit_count">Number</string>
+    <string name="weight_grams">Weight (g)</string>
+    <string name="portions">Portions</string>
+    <string name="freeze_date">Freezing date</string>
+    <string name="best_before">Best before</string>
+    <plurals name="plus_months">
+        <item quantity="one">+%d month</item>
+        <item quantity="other">+%d months</item>
+    </plurals>
+    <string name="notes_optional">Notes (optional)</string>
+    <string name="save">Save</string>
+    <string name="clear_date">Clear date</string>
+    <string name="pick_date">Pick a date</string>
+
+    <!-- Freezer setup and edit -->
+    <string name="new_freezer">New freezer</string>
+    <string name="welcome">Welcome to Frieza</string>
+    <string name="freezer_name">Freezer name</string>
+    <string name="how_many_drawers">How many drawers / shelves?</string>
+    <string name="fewer_drawers">Fewer drawers</string>
+    <string name="more_drawers">More drawers</string>
+    <string name="setup_hint">You can rename, reorder, add or delete drawers later.</string>
+    <string name="create_my_freezer">Create my freezer</string>
+    <string name="create">Create</string>
+    <string name="edit_freezer">Edit freezer</string>
+    <string name="drawers_top_to_bottom">Drawers (top to bottom)</string>
+    <string name="move_up">Move up</string>
+    <string name="move_down">Move down</string>
+    <string name="add_drawer">Add a drawer</string>
+    <string name="delete_this_freezer">Delete this freezer</string>
+    <string name="new_drawer">New drawer</string>
+    <string name="rename_drawer">Rename drawer</string>
+    <plurals name="drawer_delete_with_foods">
+        <item quantity="one">The %d food it contains will also be deleted.</item>
+        <item quantity="other">The %d foods it contains will also be deleted.</item>
+    </plurals>
+    <string name="drawer_is_empty">This drawer is empty.</string>
+    <plurals name="freezer_delete_with_foods">
+        <item quantity="one">Its drawers and the %d food they contain will be deleted.</item>
+        <item quantity="other">Its drawers and the %d foods they contain will be deleted.</item>
+    </plurals>
+    <string name="freezer_delete_drawers_only">Its drawers will be deleted.</string>
+
+    <!-- Categories -->
+    <string name="new_category">New category</string>
+    <string name="edit_category">Edit category</string>
+    <string name="category_hint">A food can have several categories; the first one gives its color.</string>
+    <string name="category_delete_message">It will be removed from the foods that use it (the foods are not deleted).</string>
+    <string name="name">Name</string>
+    <string name="color_selected">Selected</string>
+
+    <!-- Shopping list -->
+    <string name="clear_checked">Remove checked items</string>
+    <string name="add_item">Add an item</string>
+    <string name="store_in_freezer">Put in the freezer</string>
+    <string name="shopping_empty">Nothing to buy right now.</string>
+
     <!-- About dialog -->
     <string name="about_menu">About Frieza</string>
     <string name="about_version">Frieza v%1$s</string>
     <string name="about_authors">By Stéphane Perez and Claude Code</string>
     <string name="about_source">Documentation and source code:</string>
-    <string name="about_close">OK</string>
 </resources>

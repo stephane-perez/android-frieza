@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repository.
 
 ## Project
 
-**Frieza** is a personal Android app (Kotlin + Jetpack Compose) for managing the contents of one or several freezers. It is **100% local**: no account, no server, no API key, no analytics. The app is being prepared for internationalization; the UI is currently in French (see "Internationalization").
+**Frieza** is a personal Android app (Kotlin + Jetpack Compose) for managing the contents of one or several freezers. It is **100% local**: no account, no server, no API key, no analytics. The UI is available in English (default) and French (see "Internationalization").
 
 The owner has **no Android Studio**. Everything is built by GitHub Actions and the APK is installed directly on a phone. Verify changes by pushing to a branch and checking the CI run (`gh run list`, `gh run watch`), not with a local Android toolchain.
 
@@ -27,7 +27,7 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
 
 - `data/`
   - `Food.kt`: all entities (`Freezer`, `Drawer`, `Category`, `Food`, `ShoppingItem`) and `DefaultCategories`
-  - `Daos.kt`, `Converters.kt`, `FriezaDatabase.kt` (schema version 2, `MIGRATION_1_2`, default categories seeded in `onCreate`)
+  - `Daos.kt`, `Converters.kt`, `FriezaDatabase.kt` (schema version 2, `migration1To2(context)`, default categories seeded in `onCreate`)
   - `FriezaRepository.kt`: the only data entry point for the UI (CRUD, transactions, selected-freezer preference, backup)
   - `BackupCodec.kt`: JSON export/import (all data, `"app": "frieza"`, `"version": 2`)
 - `ui/freezer/`: main screen (stacked, collapsible drawers; food chips colored by first category; search, category filter, sort; multi-select; sharing of an AI "recipe ideas" prompt via the Android share sheet) and its `FreezerViewModel`
@@ -69,15 +69,13 @@ Package `com.frieza.freezer` (`app/src/main/java/com/frieza/freezer/`):
 - Commit messages in English from now on, imperative mood, short subject.
 - In Claude Code on the web, the proxy blocks tag pushes, branch deletion and GraphQL; use the REST API (`gh api`) where allowed and tell the owner what they must do in the GitHub UI.
 
-## Internationalization (planned)
+## Internationalization
 
-The About dialog already uses `res/values/strings.xml` (English) + `res/values-fr/strings.xml`; follow that pattern for new strings. Other user-visible strings are still hard-coded French literals in the Compose screens, in `FreezerViewModel.buildRecipePrompt()`, in `DefaultCategories`, in the default drawer names (`"Étage N"`) and in `util/` formatting. When internationalizing:
-
-1. Move every UI string to `res/values/strings.xml` (English as default) and add `res/values-fr/strings.xml`; use `stringResource` / plurals.
-2. Default category and drawer names are written to the database at creation time. Decide whether to store keys and translate at display time, or to seed names in the language active at first launch; keep the existing French data working through the migration.
-3. Date and number formatting uses `Locale.FRANCE`; switch to the user's locale.
-4. The shared prompt for the AI assistant should follow the app language.
-5. Backup JSON field names stay language-neutral.
+- All user-visible strings live in `res/values/strings.xml` (English, default) and `res/values-fr/strings.xml` (French). Never hard-code UI text: use `stringResource(...)` in composition, `resources.getString(...)` / `getQuantityString(...)` in callbacks, the ViewModel and `util/` (they take a `Resources` parameter). Counts use `<plurals>` (French needs `one`, `many` and `other`). Escape apostrophes (`\'`).
+- Every new key must be added to both files.
+- Default names (categories, "Shelf N", "Drawer N", "Freezer") are written to the database in the phone's language at creation time (`DefaultCategories` holds string resource ids; `FriezaRepository` receives `Resources`). Existing names are never translated, so old French data stays as is; no schema change.
+- Dates use the phone's locale order (`DateFormat.getBestDateTimePattern(locale, "ddMMyyyy")`), still formatted in UTC; numbers use `Locale.getDefault()`.
+- The AI recipe prompt follows the app language. Backup JSON field names stay language-neutral; backup errors are `BackupFormatException(messageRes)`.
 
 ## Conventions
 

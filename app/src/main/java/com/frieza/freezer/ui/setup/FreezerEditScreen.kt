@@ -1,5 +1,8 @@
 package com.frieza.freezer.ui.setup
 
+import androidx.compose.ui.platform.LocalContext
+import com.frieza.freezer.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,6 +71,7 @@ fun FreezerEditScreen(
         allDrawers.filter { it.freezerId == freezerId }.sortedBy { it.position }
     }
     val scope = rememberCoroutineScope()
+    val res = LocalContext.current.resources
 
     var nameText by remember { mutableStateOf("") }
     var nameLoaded by remember { mutableStateOf(false) }
@@ -83,10 +87,10 @@ fun FreezerEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Modifier le congélateur") },
+                title = { Text(stringResource(R.string.edit_freezer)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -105,16 +109,16 @@ fun FreezerEditScreen(
                 value = nameText,
                 onValueChange = { nameText = it },
                 singleLine = true,
-                label = { Text("Nom du congélateur") },
+                label = { Text(stringResource(R.string.freezer_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Button(
                 enabled = nameText.isNotBlank() && nameText.trim() != freezer.name,
                 onClick = { scope.launch { repository.renameFreezer(freezer, nameText) } }
-            ) { Text("Renommer") }
+            ) { Text(stringResource(R.string.rename)) }
 
             Text(
-                "Tiroirs (du haut vers le bas)",
+                stringResource(R.string.drawers_top_to_bottom),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -135,26 +139,26 @@ fun FreezerEditScreen(
                         IconButton(
                             enabled = index > 0,
                             onClick = { scope.launch { repository.moveDrawer(freezerId, drawer.id, up = true) } }
-                        ) { Icon(Icons.Filled.ArrowUpward, contentDescription = "Monter") }
+                        ) { Icon(Icons.Filled.ArrowUpward, contentDescription = stringResource(R.string.move_up)) }
                         IconButton(
                             enabled = index < drawers.lastIndex,
                             onClick = { scope.launch { repository.moveDrawer(freezerId, drawer.id, up = false) } }
-                        ) { Icon(Icons.Filled.ArrowDownward, contentDescription = "Descendre") }
+                        ) { Icon(Icons.Filled.ArrowDownward, contentDescription = stringResource(R.string.move_down)) }
                         IconButton(onClick = { dialog = EditDialog.RenameDrawer(drawer) }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Renommer")
+                            Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.rename))
                         }
                         IconButton(onClick = {
                             scope.launch {
                                 dialog = EditDialog.DeleteDrawer(drawer, repository.foodCountInDrawer(drawer.id))
                             }
-                        }) { Icon(Icons.Filled.Delete, contentDescription = "Supprimer") }
+                        }) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete)) }
                     }
                 }
             }
 
             OutlinedButton(onClick = { dialog = EditDialog.AddDrawer }) {
                 Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                Text("Ajouter un tiroir")
+                Text(stringResource(R.string.add_drawer))
             }
 
             Button(
@@ -165,15 +169,15 @@ fun FreezerEditScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp)
-            ) { Text("Supprimer ce congélateur") }
+            ) { Text(stringResource(R.string.delete_this_freezer)) }
         }
     }
 
     when (val d = dialog) {
         null -> Unit
         is EditDialog.AddDrawer -> NameDialog(
-            title = "Nouveau tiroir",
-            initial = "Tiroir ${drawers.size + 1}",
+            title = stringResource(R.string.new_drawer),
+            initial = stringResource(R.string.default_drawer_name, drawers.size + 1),
             onDismiss = { dialog = null },
             onConfirm = { text ->
                 dialog = null
@@ -181,7 +185,7 @@ fun FreezerEditScreen(
             }
         )
         is EditDialog.RenameDrawer -> NameDialog(
-            title = "Renommer le tiroir",
+            title = stringResource(R.string.rename_drawer),
             initial = d.drawer.name,
             onDismiss = { dialog = null },
             onConfirm = { text ->
@@ -191,28 +195,28 @@ fun FreezerEditScreen(
         )
         is EditDialog.DeleteDrawer -> AlertDialog(
             onDismissRequest = { dialog = null },
-            title = { Text("Supprimer « ${d.drawer.name} » ?") },
+            title = { Text(stringResource(R.string.delete_named, d.drawer.name)) },
             text = {
                 Text(
-                    if (d.foodCount > 0) "Les ${d.foodCount} aliment(s) qu'il contient seront aussi supprimés."
-                    else "Ce tiroir est vide."
+                    if (d.foodCount > 0) res.getQuantityString(R.plurals.drawer_delete_with_foods, d.foodCount, d.foodCount)
+                    else stringResource(R.string.drawer_is_empty)
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     dialog = null
                     scope.launch { repository.deleteDrawer(d.drawer.id) }
-                }) { Text("Supprimer") }
+                }) { Text(stringResource(R.string.delete)) }
             },
-            dismissButton = { TextButton(onClick = { dialog = null }) { Text("Annuler") } }
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.cancel)) } }
         )
         is EditDialog.DeleteFreezer -> AlertDialog(
             onDismissRequest = { dialog = null },
-            title = { Text("Supprimer « ${freezer?.name ?: ""} » ?") },
+            title = { Text(stringResource(R.string.delete_named, freezer?.name ?: "")) },
             text = {
                 Text(
-                    if (d.foodCount > 0) "Ses tiroirs et les ${d.foodCount} aliment(s) qu'ils contiennent seront supprimés."
-                    else "Ses tiroirs seront supprimés."
+                    if (d.foodCount > 0) res.getQuantityString(R.plurals.freezer_delete_with_foods, d.foodCount, d.foodCount)
+                    else stringResource(R.string.freezer_delete_drawers_only)
                 )
             },
             confirmButton = {
@@ -222,9 +226,9 @@ fun FreezerEditScreen(
                         repository.deleteFreezer(freezerId)
                         onFreezerDeleted()
                     }
-                }) { Text("Supprimer") }
+                }) { Text(stringResource(R.string.delete)) }
             },
-            dismissButton = { TextButton(onClick = { dialog = null }) { Text("Annuler") } }
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 }
@@ -249,8 +253,8 @@ fun NameDialog(
             )
         },
         confirmButton = {
-            TextButton(enabled = text.isNotBlank(), onClick = { onConfirm(text) }) { Text("OK") }
+            TextButton(enabled = text.isNotBlank(), onClick = { onConfirm(text) }) { Text(stringResource(R.string.ok)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
 }

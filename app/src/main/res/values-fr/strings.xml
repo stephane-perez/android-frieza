@@ -1,8 +1,193 @@
 <resources>
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Annuler</string>
+    <string name="delete">Supprimer</string>
+    <string name="back">Retour</string>
+    <string name="edit">Modifier</string>
+    <string name="rename">Renommer</string>
+    <string name="add">Ajouter</string>
+    <string name="clear">Effacer</string>
+    <string name="remove">Retirer</string>
+    <string name="delete_named">Supprimer « %1$s » ?</string>
+    <string name="action_irreversible">Cette action est définitive.</string>
+
+    <plurals name="foods_count">
+        <item quantity="one">%d aliment</item>
+        <item quantity="many">%d aliments</item>
+        <item quantity="other">%d aliments</item>
+    </plurals>
+    <plurals name="freezers_count">
+        <item quantity="one">%d congélateur</item>
+        <item quantity="many">%d congélateurs</item>
+        <item quantity="other">%d congélateurs</item>
+    </plurals>
+    <plurals name="categories_count">
+        <item quantity="one">%d catégorie</item>
+        <item quantity="many">%d catégories</item>
+        <item quantity="other">%d catégories</item>
+    </plurals>
+
+    <!-- Default names written to the database at creation time -->
+    <string name="default_freezer_name">Congélateur</string>
+    <string name="default_floor_name">Étage %d</string>
+    <string name="default_drawer_name">Tiroir %d</string>
+    <string name="default_category_vegetables">Légumes</string>
+    <string name="default_category_fruits">Fruits</string>
+    <string name="default_category_meals">Plats complets</string>
+    <string name="default_category_meat">Viandes</string>
+    <string name="default_category_fish">Poissons</string>
+    <string name="default_category_condiments">Condiments</string>
+    <string name="default_category_bread">Pain / Pâtisserie</string>
+    <string name="default_category_desserts">Desserts / Glaces</string>
+    <string name="default_category_other">Autre</string>
+
+    <!-- Main screen -->
+    <plurals name="selected_count">
+        <item quantity="one">%d sélectionné</item>
+        <item quantity="many">%d sélectionnés</item>
+        <item quantity="other">%d sélectionnés</item>
+    </plurals>
+    <string name="cancel_selection">Annuler la sélection</string>
+    <string name="select_all">Tout sélectionner</string>
+    <string name="share_chooser_title">Partager les ingrédients</string>
+    <string name="share_recipe_ideas">Partager (idées de recettes)</string>
+    <string name="delete_selection">Supprimer la sélection</string>
+    <string name="switch_freezer">Changer de congélateur</string>
+    <string name="search">Rechercher</string>
+    <string name="menu">Menu</string>
+    <string name="sort_by">Trier : %1$s</string>
+    <string name="sort_name">Nom</string>
+    <string name="sort_expiration">Péremption</string>
+    <string name="sort_recent">Ajout récent</string>
+    <string name="shopping_list">Liste de courses</string>
+    <string name="categories">Catégories</string>
+    <string name="edit_freezer_named">Modifier « %1$s »</string>
+    <string name="add_freezer">Ajouter un congélateur</string>
+    <string name="export_backup">Exporter une sauvegarde</string>
+    <string name="import_backup">Importer une sauvegarde</string>
+    <string name="expand_all">Tout ouvrir</string>
+    <string name="collapse_all">Tout fermer</string>
+    <string name="add_food">Ajouter un aliment</string>
+    <string name="search_food">Rechercher un aliment</string>
+    <plurals name="results_count">
+        <item quantity="one">%d résultat</item>
+        <item quantity="many">%d résultats</item>
+        <item quantity="other">%d résultats</item>
+    </plurals>
+    <string name="empty_no_drawer">Ce congélateur n\'a pas encore de tiroir.\nOuvre le menu ⋮ puis « Modifier » pour en ajouter.</string>
+    <string name="empty_freezer">Ton congélateur est vide.\nAppuie sur + pour ajouter un aliment.</string>
+    <string name="empty_no_match">Aucun aliment ne correspond à la recherche.</string>
+    <plurals name="delete_foods_title">
+        <item quantity="one">Supprimer %d aliment ?</item>
+        <item quantity="many">Supprimer %d aliments ?</item>
+        <item quantity="other">Supprimer %d aliments ?</item>
+    </plurals>
+    <string name="export_saved">Sauvegarde enregistrée</string>
+    <string name="export_failed">Échec de l\'export</string>
+    <string name="import_unreadable">Impossible de lire ce fichier</string>
+    <string name="import_title">Importer cette sauvegarde ?</string>
+    <string name="import_message">Toutes les données actuelles (congélateurs, aliments, catégories, liste de courses) seront remplacées. Pense à exporter d\'abord si tu veux les conserver.</string>
+    <string name="import_done">Importé : %1$s, %2$s, %3$s</string>
+    <string name="import_failed">Échec de l\'import</string>
+    <string name="replace">Remplacer</string>
+    <string name="backup_error_json">Ce fichier n\'est pas une sauvegarde valide (JSON illisible).</string>
+    <string name="backup_error_format">Format de sauvegarde non reconnu.</string>
+    <string name="backup_error_corrupt">Sauvegarde Frieza incomplète ou corrompue.</string>
+    <string name="drawer_empty">Vide</string>
+    <plurals name="drawer_count_filtered">
+        <item quantity="one">%1$d / %2$d aliment</item>
+        <item quantity="many">%1$d / %2$d aliments</item>
+        <item quantity="other">%1$d / %2$d aliments</item>
+    </plurals>
+    <string name="collapse">Replier</string>
+    <string name="expand">Déplier</string>
+
+    <!-- AI recipe prompt -->
+    <string name="prompt_intro">Voici les ingrédients dont je dispose au congélateur :</string>
+    <string name="prompt_best_before">à consommer avant le %1$s</string>
+    <string name="prompt_request">Propose-moi 3 idées de recettes réalisables avec ces ingrédients (je peux compléter avec des produits de base comme sel, huile, épices).</string>
+
+    <!-- Expiry badges and quantities -->
+    <string name="badge_expired">Périmé</string>
+    <string name="badge_under_1_month">&lt;1 mois</string>
+    <string name="badge_under_2_months">&lt;2 mois</string>
+    <plurals name="portions_count">
+        <item quantity="one">%d portion</item>
+        <item quantity="many">%d portions</item>
+        <item quantity="other">%d portions</item>
+    </plurals>
+
+    <!-- Food form -->
+    <string name="edit_food">Modifier l\'aliment</string>
+    <string name="duplicate">Dupliquer</string>
+    <string name="food_name">Nom de l\'aliment</string>
+    <string name="freezer">Congélateur</string>
+    <string name="drawer">Tiroir</string>
+    <string name="quantity_optional">Quantité (optionnel)</string>
+    <string name="unit_count">Nombre</string>
+    <string name="weight_grams">Poids (g)</string>
+    <string name="portions">Portions</string>
+    <string name="freeze_date">Date de congélation</string>
+    <string name="best_before">À consommer avant le</string>
+    <plurals name="plus_months">
+        <item quantity="one">+%d mois</item>
+        <item quantity="many">+%d mois</item>
+        <item quantity="other">+%d mois</item>
+    </plurals>
+    <string name="notes_optional">Notes (optionnel)</string>
+    <string name="save">Enregistrer</string>
+    <string name="clear_date">Effacer la date</string>
+    <string name="pick_date">Choisir une date</string>
+
+    <!-- Freezer setup and edit -->
+    <string name="new_freezer">Nouveau congélateur</string>
+    <string name="welcome">Bienvenue dans Frieza</string>
+    <string name="freezer_name">Nom du congélateur</string>
+    <string name="how_many_drawers">Combien de tiroirs / étages ?</string>
+    <string name="fewer_drawers">Moins de tiroirs</string>
+    <string name="more_drawers">Plus de tiroirs</string>
+    <string name="setup_hint">Tu pourras renommer, réordonner, ajouter ou supprimer des tiroirs ensuite.</string>
+    <string name="create_my_freezer">Créer mon congélateur</string>
+    <string name="create">Créer</string>
+    <string name="edit_freezer">Modifier le congélateur</string>
+    <string name="drawers_top_to_bottom">Tiroirs (du haut vers le bas)</string>
+    <string name="move_up">Monter</string>
+    <string name="move_down">Descendre</string>
+    <string name="add_drawer">Ajouter un tiroir</string>
+    <string name="delete_this_freezer">Supprimer ce congélateur</string>
+    <string name="new_drawer">Nouveau tiroir</string>
+    <string name="rename_drawer">Renommer le tiroir</string>
+    <plurals name="drawer_delete_with_foods">
+        <item quantity="one">L\'aliment qu\'il contient sera aussi supprimé.</item>
+        <item quantity="many">Les %d aliments qu\'il contient seront aussi supprimés.</item>
+        <item quantity="other">Les %d aliments qu\'il contient seront aussi supprimés.</item>
+    </plurals>
+    <string name="drawer_is_empty">Ce tiroir est vide.</string>
+    <plurals name="freezer_delete_with_foods">
+        <item quantity="one">Ses tiroirs et l\'aliment qu\'ils contiennent seront supprimés.</item>
+        <item quantity="many">Ses tiroirs et les %d aliments qu\'ils contiennent seront supprimés.</item>
+        <item quantity="other">Ses tiroirs et les %d aliments qu\'ils contiennent seront supprimés.</item>
+    </plurals>
+    <string name="freezer_delete_drawers_only">Ses tiroirs seront supprimés.</string>
+
+    <!-- Categories -->
+    <string name="new_category">Nouvelle catégorie</string>
+    <string name="edit_category">Modifier la catégorie</string>
+    <string name="category_hint">Un aliment peut avoir plusieurs catégories ; la première donne sa couleur.</string>
+    <string name="category_delete_message">Elle sera retirée des aliments qui l\'utilisent (les aliments ne sont pas supprimés).</string>
+    <string name="name">Nom</string>
+    <string name="color_selected">Choisie</string>
+
+    <!-- Shopping list -->
+    <string name="clear_checked">Retirer les articles cochés</string>
+    <string name="add_item">Ajouter un article</string>
+    <string name="store_in_freezer">Ranger au congélateur</string>
+    <string name="shopping_empty">Rien à acheter pour le moment.</string>
+
     <!-- About dialog -->
     <string name="about_menu">À propos de Frieza</string>
     <string name="about_version">Frieza v%1$s</string>
     <string name="about_authors">Par Stéphane Perez et Claude Code</string>
     <string name="about_source">Documentation et code source :</string>
-    <string name="about_close">OK</string>
 </resources>
